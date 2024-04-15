@@ -1,7 +1,7 @@
 var mysql = require('mysql');
 var con = mysql.createConnection({
      host: "localhost",
-     port: 3306,
+     port: 3308,
      user: 'root',
      password: '',
      database: 'frontend27'
@@ -14,4 +14,4 @@ con.connect(function (error) {
           console.log("Connection established successfully... ");
      }
 });
-module.exports.con = con ; 
+module.exports.con = con;
