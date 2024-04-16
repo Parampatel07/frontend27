@@ -1,8 +1,10 @@
 var express = require('express');
 var mysql = require('mysql');
 var connection = require('./connection');
+var bodyParser = require('body-parser');
 var app = express();
-
+//set middleware
+app.use(bodyParser.urlencoded({ extended: false }));
 app.get("/students", function (request, response) {
 
      var sql = "Select * from students ";
@@ -45,20 +47,70 @@ app.get("/students/:id", function (request, response) {
      });
 });
 //used to insert new student
-app.post("/students",function(request,response){
+app.post("/students", function (request, response) {
      //add new student
-     let sql = `insert into students (name,age,gender,dob,address,mobile) values ('ram','25','1','2000-12-25','hill drive, bhavnagar','1234567890')`;
+     let name = request.body.name;
+     let age = request.body.age;
+     let gender = request.body.gender;
+     let dob = request.body.dob;
+     let address = request.body.address;
+     let mobile = request.body.mobile;
 
-     connection.con.query(sql,function(error,result){
-          if(error!=null)
-               response.json([{ 'error': error.message }]);
-          else 
-               response.json([{ 'error': 'no'},{'success':'yes'},{'message':'student added successfully'}]);
-     });
+     if (name === undefined || age === undefined || gender === undefined || dob === undefined || address === undefined || mobile === undefined) {
+          response.json([{ 'error': 'input is missing' }]);
+     }
+     else {
+          let sql = `insert into students (name,age,gender,dob,address,mobile) values ('${name}','${age}','${gender}','${dob}','${address}','${mobile}')`;
+
+          connection.con.query(sql, function (error, result) {
+               if (error != null)
+                    response.json([{ 'error': error.message }]);
+               else
+                    response.json([{ 'error': 'no' }, { 'success': 'yes' }, { 'message': 'student added successfully' }]);
+          });
+     }
 });
 
-app.all("*",function(request,response){
-     let data = [{'error':'no such api defined'}]; //array of object
+app.put("/students", function (request, response) {
+     let name = request.body.name;
+     let age = request.body.age;
+     let gender = request.body.gender;
+     let dob = request.body.dob;
+     let address = request.body.address;
+     let mobile = request.body.mobile;
+     let studentid = request.body.studentid;
+
+     if (studentid === undefined || name === undefined || age === undefined || gender === undefined || dob === undefined || address === undefined || mobile === undefined) {
+          response.json([{ 'error': 'input is missing' }]);
+     }
+     else {
+          let sql = `update students set name='${name}',age='${age}',gender='${gender}',dob='${dob}',address='${address}',mobile='${mobile}' where id=${studentid}`;
+          connection.con.query(sql, function (error, result) {
+               if (error != null)
+                    response.json([{ 'error': error.message }]);
+               else
+                    response.json([{ 'error': 'no' }, { 'success': 'yes' }, { 'message': 'student updated successfully' }]);
+          });
+     }
+});
+app.delete("/students",function(request,response){
+     let studentid = request.body.studentid;
+     if (studentid === undefined)
+          response.json([{ 'error': 'input is missing' }]);
+     else 
+     {
+          let sql = `delete from students where id=${studentid}`;
+          connection.con.query(sql, function (error, result) {
+               if (error != null)
+                    response.json([{ 'error': error.message }]);
+               else
+                    response.json([{ 'error': 'no' }, { 'success': 'yes' }, { 'message': 'student deleted successfully' }]);
+          });
+     }
+});
+
+app.all("*", function (request, response) {
+     let data = [{ 'error': 'no such api defined' }]; //array of object
      // let data = JSON.stringify(output); //convert array of object into json strinfy object
      response.json(data);
 })
